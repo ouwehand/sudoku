@@ -4,6 +4,7 @@
 #include <vector>
 #include <iostream>
 #include <algorithm>
+#include <limits>
 #include "board.h"
 #include "movecontainer.h"
 

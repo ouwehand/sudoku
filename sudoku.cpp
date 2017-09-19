@@ -49,29 +49,39 @@
 
 		computeValidMoves(b, move_buffer);
 
-		//sort the elements in move_buffer by number of available moves
-		//elements with the least number of moves go in front
+		//find the element in move_buffer with the
+		//minimal nonzero number of available moves
+		//(if there are any moves left at all)
+		
+		bool moves_left = false;
+		int min_moves = std::numeric_limits<int>::max();
+		int min_moves_index = 0;
 
-		std::sort( move_buffer.begin(), move_buffer.end(), 
-				
-				[](MoveContainer mc1, MoveContainer mc2){
-					return mc1.getNumberOfMoves() < mc2.getNumberOfMoves();
-				}
+		for(size_t i=0; i < move_buffer.size(); i++){
+			int num_moves = move_buffer[i].getNumberOfMoves();
 
-		);
-
-		for( auto mb_iter = move_buffer.begin(); mb_iter != move_buffer.end() && !solved; mb_iter++ ){
-
-			//recurse over all the available moves in *mb_iter
-					
-			for(int j=0; j < mb_iter->getNumberOfMoves() && !solved; j++){
-					
-				Board updatedBoard = b;
-				updatedBoard.setSquareValue(mb_iter->getMoveVal(j), mb_iter->getMoveRow(), mb_iter->getMoveCol());
-				solvePuzzle(updatedBoard);
+			if(num_moves > 0 && num_moves < min_moves){
+				moves_left = true;
+				min_moves = num_moves;
+				min_moves_index = i;
 			}
 		}
 
+		//try out all available values at the square
+		//with the least number of available moves
+		
+		if(moves_left){
+			
+			int row = move_buffer[min_moves_index].getMoveRow();
+			int col = move_buffer[min_moves_index].getMoveCol();
+
+			for(int j=0; j < min_moves && !solved; j++){
+
+				Board updatedBoard = b;
+				updatedBoard.setSquareValue(move_buffer[min_moves_index].getMoveVal(j), row, col);
+				solvePuzzle(updatedBoard);
+			}
+		} 
 		return;
 	}
 
@@ -116,17 +126,18 @@
 
 	static void test2(){
 
-		//solve an easy 9x9 sudoku
+		//solve a 9x9 sudoku
 
-		std::vector<std::vector<int>> input = {{0,5,7,0,0,1,0,4,0},
-			{0,0,6,0,0,0,2,7,0},
-			{4,0,0,6,9,0,0,0,5},
-			{8,0,0,4,0,0,3,0,1},
-			{0,3,2,0,7,0,5,8,0},
-			{1,0,5,0,0,6,0,0,2},
-			{7,0,0,0,8,5,0,0,3},
-			{0,9,3,0,0,0,6,0,0},
-			{0,8,0,9,0,0,4,2,0}};
+		std::vector<std::vector<int>> input = 
+			{{8,0,3,0,2,9,7,1,6},
+			{0,0,6,0,1,8,5,0,4},
+			{0,0,0,0,6,0,0,0,8},
+			{0,0,5,0,4,6,0,8,0},
+			{7,0,9,0,3,5,6,4,2},
+			{0,6,0,0,9,0,1,0,5},
+			{6,0,0,0,7,0,0,5,1},
+			{0,0,1,6,5,0,8,0,0},
+			{5,0,0,9,8,1,4,6,3}};
 
 		Board b(3);
 		b.read(input);
